@@ -16,6 +16,7 @@ public:
   std::vector<Cell*> cells;
   std::vector<Cell*> border;
   std::vector<bool> borderBool;
+  std::vector<Vector2D> seeds;
   
   Lattice();
   Lattice(Vector2D& size);
@@ -49,10 +50,13 @@ public:
   void fillHoles();
   bool isFullySurrounded(Cell *c);
   void makeAdmissible();
-  void adjustCellsInCommon(Lattice *target);
+  std::vector<Vector2D> getCellsInCommon(Lattice *lattice);
+  bool isASeed(Cell *c);
   
   // Scale
   Lattice* scaleUp();
+
+  void printSeeds();
 };
 
 #endif

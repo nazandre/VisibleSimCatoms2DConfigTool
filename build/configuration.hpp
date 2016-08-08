@@ -29,6 +29,7 @@ public:
   void makeAdmissible();
 
   void printStats();
+  void setSeeds();
 };
 
 #endif

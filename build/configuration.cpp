@@ -5,6 +5,8 @@
 #include "configuration.hpp"
 #include "tinyxml.h"
 
+#define EXPORT_TARGET_AS_INITIAL
+
 using namespace std;
 
 /****** Lattice Class ******/
@@ -219,8 +221,10 @@ void Configuration::exportXML(string &_outputXML) {
   output << "  <blockList color=\""
 	 << defaultColor.getString()
 	 << "\">" << endl;
-
   Lattice *current = lattices[0];
+#ifdef EXPORT_TARGET_AS_INITIAL
+  current = lattices[1];
+#endif
   for (unsigned int i = 0; i < current->cells.size(); i++) {
     Cell *c = current->cells[i];
     
@@ -250,10 +254,20 @@ void Configuration::exportXML(string &_outputXML) {
   output << "</world>" << endl;
 }
 
+void Configuration::setSeeds() {
+  Lattice *initial = lattices[0];
+  Lattice *target = lattices[1];
+  vector<Vector2D> v = initial->getCellsInCommon(target);
+  initial->seeds = v;
+  target->seeds = v;
+}
+
 Configuration* Configuration::scaleUp() {
   Configuration *configuration = new Configuration();
   //Vector2D size;
   //int i = 0;
+
+  setSeeds();
   
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
     Lattice *l = *it;
@@ -274,21 +288,15 @@ Configuration* Configuration::scaleUp() {
 }
 
 void Configuration::makeAdmissible() {
-  //int i = 0;
-
-  Lattice *previous = lattices[0];
-  for(unsigned int i = 1; i < lattices.size(); i++) {
-    Lattice *current = lattices[1];
-    previous->adjustCellsInCommon(current);
-    previous = current;
-  }
-  
+  //int i = 0;  
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
     //i++;
     //cerr << "Make admissible: Lattice " << i << endl; 
     Lattice *l = *it;
     l->makeAdmissible();
   }
+  
+  setSeeds();
 }
 
 void Configuration::printStats() {
@@ -302,8 +310,10 @@ void Configuration::printStats() {
        << lattices[0]->cells.size()
        << endl;
 
+  lattices[0]->printSeeds();
+  
   if (lattices.size() > 1) {
-    cerr << "Initial: "
+    cerr << "Target: "
 	 << lattices[1]->cells.size()
 	 << endl;
   }

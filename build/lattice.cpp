@@ -311,6 +311,7 @@ Lattice* Lattice::scaleUp() {
 #endif
     int ix = ic->position.x;
     int iy = ic->position.y;
+    bool seed = isASeed(ic);
 
     int ty = T_Y(iy);
     int tx;
@@ -320,50 +321,72 @@ Lattice* Lattice::scaleUp() {
       tx = T_X_ODD(ix);
     }
     Vector2D tv = Vector2D(tx,ty);
-
+    
     Cell *tc = new Cell(tv, ic->color);
-    tl->insert(tc);
+    if(!seed) {
+      tl->insert(tc);
 #ifdef DEBUG_SCALE_UP
       cerr << "add tc" << "(" << tv.getString2D() << ")" << endl;
 #endif
-      
+    }
+    
     list<Vector2D> neighbors = tl->getConnectivity(tc);
     for (list<Vector2D>::iterator it = neighbors.begin(); it != neighbors.end(); ++it) {
       Vector2D &pos = *it;
-#ifdef DEBUG_SCALE_UP
-      cerr << "add tc" << "(" << pos.getString2D() << ")" << endl;
-#endif
       Cell *n = tl->getCell(pos);
       if (n != NULL) {
 	cout << "ERROR!" << endl;
 	return NULL;
       }
 
-      /*if (pos == seed) {
+      if (seed) {
 	if (pos.y > 0) {
 	  continue;
 	}
-	}*/
+      }
+
+#ifdef DEBUG_SCALE_UP
+      cerr << "add tc" << "(" << pos.getString2D() << ")" << endl;
+#endif
       
       n = new Cell(pos,tc->color);
       tl->insert(n);
+    }
+    if (seed) {
+      delete tc;
     }
   }
   return tl;
 }
 
-void Lattice::adjustCellsInCommon(Lattice *target) {
-  // Called from initial
-  // Keep only cells on the ground
+vector<Vector2D> Lattice::getCellsInCommon(Lattice *lattice) {
+  vector<Vector2D> v;
   Cell *ic, *tc;
   for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
     ic = *it;
-    tc = target->getCell(ic->position);
+    tc = lattice->getCell(ic->position);
     if (tc != NULL) {
-      if (tc->position.y != 0) {
-	removeCell(ic->position);
-	target->removeCell(tc->position);
-      }
+      v.push_back(ic->position);
     }
-  }  
+  }
+  return v;
+}
+
+bool Lattice::isASeed(Cell *c) {
+  for (vector<Vector2D>::iterator it = seeds.begin(); it != seeds.end(); ++it) {
+    Vector2D &s = *it;
+    if (s == c->position) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Lattice::printSeeds() {
+  cerr << "Seeds: ";
+  for (vector<Vector2D>::iterator it = seeds.begin(); it != seeds.end(); ++it) {
+    Vector2D &s = *it;
+    cerr << "(" << s.getString2D() << ")" << ",";
+  }
+  cerr << endl;
 }
