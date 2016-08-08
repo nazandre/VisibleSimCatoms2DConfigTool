@@ -275,6 +275,14 @@ Configuration* Configuration::scaleUp() {
 
 void Configuration::makeAdmissible() {
   //int i = 0;
+
+  Lattice *previous = lattices[0];
+  for(unsigned int i = 1; i < lattices.size(); i++) {
+    Lattice *current = lattices[1];
+    previous->adjustCellsInCommon(current);
+    previous = current;
+  }
+  
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
     //i++;
     //cerr << "Make admissible: Lattice " << i << endl; 

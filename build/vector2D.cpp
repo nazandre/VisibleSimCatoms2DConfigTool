@@ -24,6 +24,10 @@ Vector2D operator/(const Vector2D  &v1, const int &i) {
   return Vector2D(v1.x/i,v1.y/i);
 }
 
+bool operator==(const Vector2D &v1, const Vector2D &v2) {
+  return (v1.x == v2.x) && (v1.y == v2.y);
+}
+
 string Vector2D::getString3D(int v) const {
   return to_string(x) + "," + to_string(v) + "," + to_string(y);
 }
@@ -31,3 +35,4 @@ string Vector2D::getString3D(int v) const {
 string Vector2D::getString2D() const {
   return to_string(x) + "," + to_string(y);
 }
+

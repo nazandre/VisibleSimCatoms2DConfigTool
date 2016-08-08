@@ -26,6 +26,8 @@ public:
   int getIndex(Vector2D &p);
   void insert(Cell* c);
   Cell* getCell(Vector2D &p);
+  void removeCell(Vector2D &p);
+  
   void initGrid();
   
   std::list<Cell*> getNeighbors(Cell *c);
@@ -47,7 +49,8 @@ public:
   void fillHoles();
   bool isFullySurrounded(Cell *c);
   void makeAdmissible();
-
+  void adjustCellsInCommon(Lattice *target);
+  
   // Scale
   Lattice* scaleUp();
 };

@@ -55,6 +55,20 @@ Cell* Lattice::getCell(Vector2D &p) {
   return grid[getIndex(p)];
 }
 
+void Lattice::removeCell(Vector2D &p) {
+  /*Cell *c = getCell(p);
+  if ( c != NULL) {
+    for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
+      if (c == *it) {
+	cells.erase(it);
+	break;
+      }
+    }
+    delete c;
+    grid[getIndex(p)] = NULL;
+    }*/
+}
+
 void Lattice::initGrid() {
   grid = new Cell*[size.x*size.y]{NULL};
 }
@@ -208,6 +222,7 @@ void Lattice::computeBorder() {
   list<Cell*> neighbors;
   stack<Cell*> stack;
 
+  border.clear();
   borderBool = vector<bool>(cells.size());
   borderBool.assign(borderBool.size(),false);
   
@@ -246,13 +261,13 @@ void Lattice::makeAdmissible() {
   bool change = true;
   list<Vector2D> neighborCells;
   int n;
+  
+  fillHoles();
+  //cerr << "Holes filled!" << endl;
 
   //cerr << "Compute border..." << endl;
   computeBorder();
   //cerr << "Border computed!" << endl;
-  
-  fillHoles();
-  //cerr << "Holes filled!" << endl;
   
   while (change) {
     change = false;
@@ -264,7 +279,7 @@ void Lattice::makeAdmissible() {
 	pos = *it;
 	c2 = getCell(pos);
 	if (c2 == NULL) { // is an empty cell
-	  n = getNumNeighbors(pos);
+	  n = getNumNeighbors(pos,true);
 	  if (n > 3) {
 	    change = true;
 	    col = averageNeighborColor(pos);
@@ -323,9 +338,32 @@ Lattice* Lattice::scaleUp() {
 	cout << "ERROR!" << endl;
 	return NULL;
       }
+
+      /*if (pos == seed) {
+	if (pos.y > 0) {
+	  continue;
+	}
+	}*/
+      
       n = new Cell(pos,tc->color);
       tl->insert(n);
     }
   }
   return tl;
+}
+
+void Lattice::adjustCellsInCommon(Lattice *target) {
+  // Called from initial
+  // Keep only cells on the ground
+  Cell *ic, *tc;
+  for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
+    ic = *it;
+    tc = target->getCell(ic->position);
+    if (tc != NULL) {
+      if (tc->position.y != 0) {
+	removeCell(ic->position);
+	target->removeCell(tc->position);
+      }
+    }
+  }  
 }
