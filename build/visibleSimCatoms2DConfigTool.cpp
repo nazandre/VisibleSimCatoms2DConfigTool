@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
 
   newConfiguration->exportXML(arguments.output);
   cerr << "Newly generated configuration exported in " << arguments.output << "!" << endl;
+
+  delete newConfiguration;
   
   return EXIT_SUCCESS;
 }
