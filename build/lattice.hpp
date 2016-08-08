@@ -46,7 +46,7 @@ public:
   bool isAHole(Vector2D &p);
   void fillHoles();
   bool isFullySurrounded(Cell *c);
-  void makeItAdmissible();
+  void makeAdmissible();
 
   // Scale
   Lattice* scaleUp();

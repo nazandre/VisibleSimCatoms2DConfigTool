@@ -55,7 +55,7 @@ void Configuration::importXML(string &_inputXML) {
       int pos1 = str.find_first_of(',');
       int pos2 = str.find_last_of(',');
       lx = atoi(str.substr(0,pos1).c_str());
-      ly = atoi(str.substr(pos1+1,pos2-pos1-1).c_str());
+      ly = atoi(str.substr(pos2+1,str.length()-pos1-1).c_str());
     } else {
       cerr << "ERROR: Grid size not specified! " << endl;
       exit(EXIT_FAILURE);
@@ -67,7 +67,7 @@ void Configuration::importXML(string &_inputXML) {
 
   Vector2D size(lx,ly);
   cerr << "Grid size: "
-       << "x=" << size.x << ","
+       << "(x=" << size.x << ","
        << "z=" << size.y << ")"
        << endl;  
 
@@ -99,7 +99,7 @@ void Configuration::importXML(string &_inputXML) {
 	int pos1 = str.find_first_of(',');
 	int pos2 = str.find_last_of(',');
 	position.x = atoi(str.substr(0,pos1).c_str());
-	position.y = atoi(str.substr(pos1+1,pos2-pos1-1).c_str());
+	position.y = atoi(str.substr(pos2+1,str.length()-pos1-1).c_str());
       } else {
 	// line number ?
 	cerr << "ERROR: No position specified for a module!" << endl;
@@ -133,8 +133,9 @@ void Configuration::importXML(string &_inputXML) {
 
   // read targets
   node = xmlDoc.FirstChild("world");
-  TiXmlNode *target = node->FirstChild("targetList");
-
+  node = node->FirstChild("targetList");
+  TiXmlNode *target = node->FirstChild("target");
+  
   while(target) {
     TiXmlElement* element = target->ToElement();
     const char *attr = element->Attribute("format");
@@ -157,7 +158,7 @@ void Configuration::importXML(string &_inputXML) {
 	int pos1 = str.find_first_of(',');
 	int pos2 = str.find_last_of(',');
 	position.x = atoi(str.substr(0,pos1).c_str());
-	position.y = atoi(str.substr(pos1+1,pos2-pos1-1).c_str());
+	position.y = atoi(str.substr(pos2+1,str.length()-pos1-1).c_str());
       } else {
 	// line number ?
 	cerr << "ERROR: No position specified for a module!" << endl;
@@ -210,7 +211,7 @@ void Configuration::exportXML(string &_outputXML) {
   output << "<?xml version=\"1.0\" standalone=\"no\" ?>" << endl;
   
   // header
-  output << "<world gridSize=\"" <<  sceneSize.getString() << "\">" << endl;
+  output << "<world gridSize=\"" <<  latticeSize.getString3D(1) << "\">" << endl;
   output << "  <camera target=\"" << midPoint.getString() << "\" directionSpherical=\"" << angleAzimut << "," << angleElevation << "," << distance << "\" angle=\"45\"/>" << endl;
   output << "  <spotlight target=\"" << midPoint.getString() << "\" directionSpherical=\"" << angleAzimut << "," << angleElevation << "," << distance << "\" angle=\"30\"/>" << endl;
   
@@ -251,18 +252,51 @@ void Configuration::exportXML(string &_outputXML) {
 
 Configuration* Configuration::scaleUp() {
   Configuration *configuration = new Configuration();
+  //Vector2D size;
+  //int i = 0;
   
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
     Lattice *l = *it;
     Lattice *tl = l->scaleUp();
+    //i++;
+    //    cerr << "ScaleUp lattice " << i << ": "
+    // << l->cells.size() << " => " << tl->cells.size()
+    //	 << endl;
+    //size = tl->size;
     configuration->lattices.push_back(tl);
   }
+
+  //cerr << "New configuration lattice size: "
+  //     << "(" << size.x << "," << size.y << ")"
+  //     << endl;
+  
   return configuration;
 }
 
-void Configuration::makeItAdmissible() {
+void Configuration::makeAdmissible() {
+  //int i = 0;
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
+    //i++;
+    //cerr << "Make admissible: Lattice " << i << endl; 
     Lattice *l = *it;
-    l->makeItAdmissible();
+    l->makeAdmissible();
+  }
+}
+
+void Configuration::printStats() {
+  Vector2D& size = lattices[0]->size;
+  
+  cerr << "Lattice size: "
+       << "(" << size.x << "," << size.y << ")"
+       << endl;
+
+  cerr << "Initial: "
+       << lattices[0]->cells.size()
+       << endl;
+
+  if (lattices.size() > 1) {
+    cerr << "Initial: "
+	 << lattices[1]->cells.size()
+	 << endl;
   }
 }

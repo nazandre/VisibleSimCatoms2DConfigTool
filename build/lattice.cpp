@@ -7,6 +7,10 @@
 
 using namespace std;
 
+//#define DEBUG_IMPORT
+//#define DEBUG_SCALE_UP
+//#define DEBUG_MAKE_ADMISSIBLE
+
 #define EVEN(x) (x%2 == 1)
 #define ODD(x) (x%2 == 0)
 
@@ -40,6 +44,11 @@ void Lattice::insert(Cell* c) {
   c->id = cells.size();
   cells.push_back(c);
   grid[getIndex(c->position)] = c;
+#ifdef DEBUG_IMPORT
+  cerr << "Add " << c->id << " at "
+       << "(" << c->position.getString2D() << ")"
+       << endl;
+#endif
 }
 
 Cell* Lattice::getCell(Vector2D &p) {
@@ -198,8 +207,9 @@ void Lattice::computeBorder() {
   Vector2D pos;
   list<Cell*> neighbors;
   stack<Cell*> stack;
-  
-  borderBool.assign(border.size(),false);
+
+  borderBool = vector<bool>(cells.size());
+  borderBool.assign(borderBool.size(),false);
   
   pos.y = 0;
   for (pos.x = 0; pos.x < size.x; pos.x++) {
@@ -209,11 +219,14 @@ void Lattice::computeBorder() {
     }
   }
   border.push_back(c1);
+  //cerr << "nb cells: " << cells.size() << endl;
+  //cerr << "c1: " << c1->id << endl;
   borderBool[c1->id] = true;
   stack.push(c1);
   
   while(!stack.empty()) {
     c1 = stack.top();
+    stack.pop();
     neighbors = getNeighbors(c1);
     for (list<Cell*>::iterator it = neighbors.begin(); it != neighbors.end(); ++it) {
       c2 = *it;
@@ -224,26 +237,23 @@ void Lattice::computeBorder() {
       }
     }
   }
-
-  /*for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
-    Cell *c = *it;
-    if (isOnBorder(c)) {
-      border.push_back(c);
-    }
-    }*/
 }
 
-void Lattice::makeItAdmissible() {
+void Lattice::makeAdmissible() {
   Cell *c1, *c2;
   Vector2D pos;
   Vector3D col;
   bool change = true;
   list<Vector2D> neighborCells;
   int n;
-  
-  computeBorder();
-  fillHoles();
 
+  //cerr << "Compute border..." << endl;
+  computeBorder();
+  //cerr << "Border computed!" << endl;
+  
+  fillHoles();
+  //cerr << "Holes filled!" << endl;
+  
   while (change) {
     change = false;
     for (vector<Cell*>::iterator it = border.begin(); it != border.end(); ++it) {
@@ -278,9 +288,12 @@ void Lattice::makeItAdmissible() {
 Lattice* Lattice::scaleUp() {
   Vector2D tsize = Vector2D(T_X_EVEN(size.x), T_Y(size.y));
   Lattice *tl = new Lattice(tsize);
-
+  
   for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
     Cell *ic = *it;
+#ifdef DEBUG_SCALE_UP
+    cerr << "ic: " << "(" << ic->position.getString2D() << ")" << endl;
+#endif
     int ix = ic->position.x;
     int iy = ic->position.y;
 
@@ -295,11 +308,17 @@ Lattice* Lattice::scaleUp() {
 
     Cell *tc = new Cell(tv, ic->color);
     tl->insert(tc);
-
-    list<Vector2D> neighbors = getConnectivity(tc);
+#ifdef DEBUG_SCALE_UP
+      cerr << "add tc" << "(" << tv.getString2D() << ")" << endl;
+#endif
+      
+    list<Vector2D> neighbors = tl->getConnectivity(tc);
     for (list<Vector2D>::iterator it = neighbors.begin(); it != neighbors.end(); ++it) {
       Vector2D &pos = *it;
-      Cell *n = getCell(pos);
+#ifdef DEBUG_SCALE_UP
+      cerr << "add tc" << "(" << pos.getString2D() << ")" << endl;
+#endif
+      Cell *n = tl->getCell(pos);
       if (n != NULL) {
 	cout << "ERROR!" << endl;
 	return NULL;

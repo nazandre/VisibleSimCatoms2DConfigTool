@@ -27,3 +27,7 @@ Vector2D operator/(const Vector2D  &v1, const int &i) {
 string Vector2D::getString3D(int v) const {
   return to_string(x) + "," + to_string(v) + "," + to_string(y);
 }
+
+string Vector2D::getString2D() const {
+  return to_string(x) + "," + to_string(y);
+}

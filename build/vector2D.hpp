@@ -14,6 +14,7 @@ public:
   ~Vector2D();
 
   std::string getString3D(int v) const;
+  std::string getString2D() const;
 };
 
 Vector2D operator+(const Vector2D  &v1, const Vector2D &v2);

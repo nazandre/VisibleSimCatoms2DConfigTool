@@ -26,7 +26,9 @@ public:
   void exportXML(std::string& _outputXML);
 
   Configuration* scaleUp();
-  void makeItAdmissible();
+  void makeAdmissible();
+
+  void printStats();
 };
 
 #endif
