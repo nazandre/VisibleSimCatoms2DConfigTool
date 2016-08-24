@@ -29,3 +29,12 @@ Vector3D operator+(const Vector3D  &v1, const Vector3D &v2) {
 Vector3D operator/(const Vector3D  &v1, const int &i) {
   return Vector3D(v1.x/i,v1.y/i,v1.z/i);
 }
+
+bool operator==(const Vector3D &v1, const Vector3D &v2) {
+  return (v1.x == v2.x) && (v1.y == v2.y) && (v1.z == v2.z);
+}
+
+bool operator!=(const Vector3D &v1, const Vector3D &v2) {
+  return (v1.x != v2.x) || (v1.y != v2.y) || (v1.z != v2.z);
+}
+

@@ -5,7 +5,7 @@
 #include "configuration.hpp"
 #include "tinyxml.h"
 
-#define EXPORT_TARGET_AS_INITIAL
+//#define EXPORT_TARGET_AS_INITIAL
 
 using namespace std;
 

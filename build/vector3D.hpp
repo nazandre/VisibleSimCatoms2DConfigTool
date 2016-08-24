@@ -20,5 +20,7 @@ public:
 
 Vector3D operator+(const Vector3D  &v1, const Vector3D &v2);
 Vector3D operator/(const Vector3D &v1, const int &i);
+bool operator==(const Vector3D &v1, const Vector3D &v2);
+bool operator!=(const Vector3D &v1, const Vector3D &v2);
 
 #endif

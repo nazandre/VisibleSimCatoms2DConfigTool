@@ -130,6 +130,44 @@ Vector3D Lattice::averageNeighborColor(Vector2D &p) {
   return col;
 }
 
+Vector3D Lattice::dominantNeighborColor(Vector2D &p) {
+  Cell *cell;
+  list<Cell*> neighbors = getNeighbors(p);
+
+  vector<Vector3D> neighborCol;
+  vector<unsigned int> occ;
+  
+  for (list<Cell*>::iterator it=neighbors.begin();
+       it != neighbors.end(); ++it) {
+    cell = *it;
+    bool found = false;
+    unsigned int i = 0;
+    for(vector<Vector3D>::iterator itc=neighborCol.begin(); itc != neighborCol.end(); itc++) {
+      if(*itc == cell->color) {
+	found = true;
+	break;
+      }
+      i++;
+    }
+    if (!found) {
+      neighborCol.push_back(cell->color);
+      occ.push_back(1);
+    } else {
+      occ[i]++;
+    }
+  }
+
+  // locate max
+  unsigned int max = 0;
+  for(unsigned int j = 1; j < occ.size(); j++) {
+    if (occ[j] > occ[max]) {
+      max = j;
+    }
+  }
+  
+  return neighborCol[max];
+}
+
 list<Vector2D> Lattice::getRelativeConnectivity(Vector2D &p) {
   list<Vector2D> nCells;
 
@@ -202,7 +240,8 @@ void Lattice::fillHoles() {
     for (int y = 0; y < size.y; y++) {
       pos = Vector2D(x,y);
       if (isAHole(pos)) {
-	col = averageNeighborColor(pos);
+	//col = averageNeighborColor(pos);
+	col = dominantNeighborColor(pos);
 	cell = new Cell(pos,col);
 	insert(cell);
       }
@@ -282,7 +321,7 @@ void Lattice::makeAdmissible() {
 	  n = getNumNeighbors(pos,true);
 	  if (n > 3) {
 	    change = true;
-	    col = averageNeighborColor(pos);
+	    col = dominantNeighborColor(pos);//averageNeighborColor(pos);
 	    c2 = new Cell(pos,col);
 	    // color
 	    insert(c2);

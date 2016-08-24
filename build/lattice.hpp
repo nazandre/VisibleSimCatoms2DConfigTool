@@ -43,6 +43,7 @@ public:
   int getNumNeighbors(Vector2D &p, bool ground = false);
 
   Vector3D averageNeighborColor(Vector2D &p);
+  Vector3D dominantNeighborColor(Vector2D &p);
   
   // Self-reconfiguration algorithm: about admissibility
   void computeBorder();
