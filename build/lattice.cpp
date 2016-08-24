@@ -14,6 +14,8 @@ using namespace std;
 #define EVEN(x) (x%2 == 1)
 #define ODD(x) (x%2 == 0)
 
+//#define DISABLE_SEED_CHECK
+
 /****** Lattice Class ******/
 Lattice::Lattice() {
   grid = NULL;
@@ -350,8 +352,11 @@ Lattice* Lattice::scaleUp() {
 #endif
     int ix = ic->position.x;
     int iy = ic->position.y;
+#ifdef DISABLE_SEED_CHECK
+    bool seed = false;
+#else
     bool seed = isASeed(ic);
-
+#endif
     int ty = T_Y(iy);
     int tx;
     if (EVEN(iy)) {
