@@ -59,12 +59,12 @@ Cell* Lattice::getCell(Vector2D &p) {
 
 void Lattice::removeCell(Vector2D &p) {
   /*Cell *c = getCell(p);
-  if ( c != NULL) {
+    if ( c != NULL) {
     for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
-      if (c == *it) {
-	cells.erase(it);
-	break;
-      }
+    if (c == *it) {
+    cells.erase(it);
+    break;
+    }
     }
     delete c;
     grid[getIndex(p)] = NULL;
@@ -159,14 +159,17 @@ Vector3D Lattice::dominantNeighborColor(Vector2D &p) {
     }
   }
 
+  Vector3D grey(100,100,100);
   // locate max
   unsigned int max = 0;
   for(unsigned int j = 1; j < occ.size(); j++) {
     if (occ[j] > occ[max]) {
       max = j;
     }
+    if (occ[j] == occ[max] && neighborCol[max] == grey) {
+      max = j;
+    }
   }
-  
   return neighborCol[max];
 }
 
@@ -219,16 +222,16 @@ bool Lattice::isAHole(Vector2D &p) { // One cell for now!
       neighbors = getNeighbors(p);
       bool hole = true;
       for (list<Cell*>::iterator it=neighbors.begin();
-	   it != neighbors.end(); ++it) {
-	cell = *it;
-	if (!borderBool[cell->id]) {
-	  return false;
-	}
+      it != neighbors.end(); ++it) {
+      cell = *it;
+      if (!borderBool[cell->id]) {
+      return false;
       }
-    }
-  } else {
-    return false;
-    }*/
+      }
+      }
+      } else {
+      return false;
+      }*/
   }
   return false;
 }
@@ -275,8 +278,7 @@ void Lattice::computeBorder() {
     }
   }
   border.push_back(c1);
-  //cerr << "nb cells: " << cells.size() << endl;
-  //cerr << "c1: " << c1->id << endl;
+  
   borderBool[c1->id] = true;
   stack.push(c1);
   
@@ -338,12 +340,16 @@ void Lattice::makeAdmissible() {
 }
 
 #define T_Y(y) (3*y + 1)
-#define T_X_EVEN(x) (3*x + 3)
-#define T_X_ODD(x) (3*x + 1) 
+#define T_X_EVEN(x) (3*x + 3 - off)
+#define T_X_ODD(x) (3*x + 1 - off) 
+#define T_X_SEED(x) (3*x + 1)
 
 Lattice* Lattice::scaleUp() {
+  int off = 0;
   Vector2D tsize = Vector2D(T_X_EVEN(size.x), T_Y(size.y));
   Lattice *tl = new Lattice(tsize);
+
+  Vector2D seedPos = getSeed();
   
   for (vector<Cell*>::iterator it = cells.begin(); it != cells.end(); ++it) {
     Cell *ic = *it;
@@ -357,47 +363,64 @@ Lattice* Lattice::scaleUp() {
 #else
     bool seed = isASeed(ic);
 #endif
-    int ty = T_Y(iy);
-    int tx;
-    if (EVEN(iy)) {
-      tx = T_X_EVEN(ix);
-    } else {
-      tx = T_X_ODD(ix);
-    }
-    Vector2D tv = Vector2D(tx,ty);
+   
+    if (!seed) {
+
+      bool rightOfSeed = false;
+      if (ix >= seedPos.x) {
+	rightOfSeed = true; 
+      }
+      
+      if (rightOfSeed) {
+	off = 1;
+      } else {
+	off = 0;
+      }
+      
+      int ty = T_Y(iy);
+      int tx;
+      if (EVEN(iy)) {
+	tx = T_X_EVEN(ix);
+      } else {
+	tx = T_X_ODD(ix);
+      }
     
-    Cell *tc = new Cell(tv, ic->color);
-    if(!seed) {
+      Vector2D tv = Vector2D(tx,ty);
+    
+      Cell *tc = new Cell(tv, ic->color);
+
       tl->insert(tc);
+	
 #ifdef DEBUG_SCALE_UP
       cerr << "add tc" << "(" << tv.getString2D() << ")" << endl;
 #endif
-    }
-    
-    list<Vector2D> neighbors = tl->getConnectivity(tc);
-    for (list<Vector2D>::iterator it = neighbors.begin(); it != neighbors.end(); ++it) {
-      Vector2D &pos = *it;
-      Cell *n = tl->getCell(pos);
-      if (n != NULL) {
-	cout << "ERROR!" << endl;
-	return NULL;
-      }
-
-      if (seed) {
-	if (pos.y > 0) {
-	  continue;
+      
+      
+      list<Vector2D> neighbors = tl->getConnectivity(tc);
+      for (list<Vector2D>::iterator it = neighbors.begin(); it != neighbors.end(); ++it) {
+	Vector2D &pos = *it;
+	Cell *n = tl->getCell(pos);
+	if (n != NULL) {
+	  cout << "ERROR: Cell has already been inserted!" << endl;
+	  return NULL;
 	}
-      }
-
+        
 #ifdef DEBUG_SCALE_UP
       cerr << "add tc" << "(" << pos.getString2D() << ")" << endl;
 #endif
       
       n = new Cell(pos,tc->color);
       tl->insert(n);
-    }
-    if (seed) {
-      delete tc;
+      
+      }
+    } else {
+      int ty = 0;
+      int tx = T_X_SEED(ix);
+	
+      Vector2D tv = Vector2D(tx,ty);
+	
+      Cell *tc = new Cell(tv, ic->color);
+      tl->insert(tc);
     }
   }
   return tl;
@@ -424,6 +447,14 @@ bool Lattice::isASeed(Cell *c) {
     }
   }
   return false;
+}
+
+Vector2D Lattice::getSeed() {
+  Vector2D c(0,0);
+  if (seeds.size() > 0) {
+    c = *(seeds.begin());
+  }
+  return c;
 }
 
 void Lattice::printSeeds() {

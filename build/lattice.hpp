@@ -10,18 +10,24 @@
 
 class Lattice {
 
-public:  
+public:
+  Lattice *parent;
+  
   Vector2D size;
   Cell** grid;
   std::vector<Cell*> cells;
   std::vector<Cell*> border;
   std::vector<bool> borderBool;
   std::vector<Vector2D> seeds;
+
+  Vector2D offset;
   
   Lattice();
   Lattice(Vector2D& size);
   Lattice(const Lattice &l);
   ~Lattice();
+
+  inline void setParent(Lattice *p) {parent = p;}
   
   bool isIn(Vector2D &p); 
   int getIndex(Vector2D &p);
@@ -53,7 +59,7 @@ public:
   void makeAdmissible();
   std::vector<Vector2D> getCellsInCommon(Lattice *lattice);
   bool isASeed(Cell *c);
-  
+  Vector2D getSeed();
   // Scale
   Lattice* scaleUp();
 

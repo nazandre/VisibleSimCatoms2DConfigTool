@@ -267,6 +267,8 @@ Configuration* Configuration::scaleUp() {
   //Vector2D size;
   //int i = 0;
 
+  lattices[1]->setParent(lattices[0]);
+  
   setSeeds();
   
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
@@ -288,10 +290,7 @@ Configuration* Configuration::scaleUp() {
 }
 
 void Configuration::makeAdmissible() {
-  //int i = 0;  
   for (vector<Lattice*>::iterator it = lattices.begin(); it != lattices.end(); ++it) {
-    //i++;
-    //cerr << "Make admissible: Lattice " << i << endl; 
     Lattice *l = *it;
     l->makeAdmissible();
   }

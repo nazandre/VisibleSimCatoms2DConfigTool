@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
   Configuration *newConfiguration = configuration.scaleUp();
   cerr << "Configuration scaled up!" << endl;
-
+  
   newConfiguration->makeAdmissible();
   cerr << "Newly generated configuration made admissible!" << endl;
 

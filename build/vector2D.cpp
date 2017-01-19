@@ -2,7 +2,10 @@
 
 using namespace std;
 
-Vector2D::Vector2D() {};
+Vector2D::Vector2D() {
+  x = 0;
+  y = 0;
+};
 
 Vector2D::Vector2D(int _x, int _y) {
   x = _x;
@@ -26,6 +29,10 @@ Vector2D operator/(const Vector2D  &v1, const int &i) {
 
 bool operator==(const Vector2D &v1, const Vector2D &v2) {
   return (v1.x == v2.x) && (v1.y == v2.y);
+}
+
+bool operator!=(const Vector2D &v1, const Vector2D &v2) {
+  return (v1.x != v2.x) || (v1.y != v2.y);
 }
 
 string Vector2D::getString3D(int v) const {
